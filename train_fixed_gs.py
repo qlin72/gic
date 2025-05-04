@@ -15,7 +15,7 @@ from utils.general_utils import safe_state
 from pytorch3d.loss import chamfer_distance
 from argparse import ArgumentParser, Namespace
 from arguments import ModelParams, PipelineParams, get_combined_args, OptimizationParams
-from new_trajectory import load_pcd_file, read_estimation_result, gen_xyz_list, render_new
+from new_trajectory import load_pcd_file, read_estimation_result, gen_xyz_list, render_new, load_sim_pcd_file
 from train_gs_fixed_pcd import train_gs_with_fixed_pcd
 from utils.image_utils import psnr
 from utils.loss_utils import ssim
@@ -29,45 +29,55 @@ if __name__ == "__main__":
     parser.add_argument("--predict_frames", default=30, type=int)
     # parser.add_argument("--train_frames", type=int)#, default=14, type=int)
     parser.add_argument("--train_frames", default=14, type=int)
-    parser.add_argument("--gt_path", type=str)
-    parser.add_argument('-cid', '--config_id', type=int, default=0)
+    # parser.add_argument("--gt_path", type=str)
+    # parser.add_argument('-cid', '--config_id', type=int, default=0)
+    parser.add_argument('--source_path', type=str)
+    parser.add_argument('--config_path', type=str)
+    parser.add_argument('--model_path', type=str)
+    parser.add_argument('--sim_ini_pcd_path', type=str)
+    
     model = ModelParams(parser)#, sentinel=True)
     pipeline = PipelineParams(parser)
     op = OptimizationParams(parser)
-    gs_args, phys_args = get_combined_args(parser)
-    print(phys_args)
-    setattr(phys_args, "config_id", gs_args.config_id)
+    
+    args = parser.parse_args()
+    
+    # gs_args, phys_args = get_combined_args(parser)
     # print(phys_args)
-    safe_state(gs_args.quiet)
-    dataset = model.extract(gs_args)
-    opt = op.extract(gs_args)
-    pipe = pipeline.extract(gs_args)
-    bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
-    background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
-    ti.init(arch=ti.cuda, debug=False, fast_math=False, device_memory_fraction=0.5)
+    # setattr(phys_args, "config_id", gs_args.config_id)
+    # print(phys_args)
+    dataset = model.extract(args)
+    opt = op
+    pipe = pipeline
+    # opt = op.extract(gs_args)
+    # pipe = pipeline.extract(gs_args)
+    # bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
+    # background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
+    # ti.init(arch=ti.cuda, debug=False, fast_math=False, device_memory_fraction=0.5)
 
-    model_path = Path(dataset.model_path)
-    obj_name = dataset.model_path.split('/')[-1]
-    (model_path/f'{obj_name}_img_render').mkdir(exist_ok=True)
-    (model_path/f'{obj_name}_img_gt').mkdir(exist_ok=True)
+    # model_path = Path(dataset.model_path)
+    # obj_name = dataset.model_path.split('/')[-1]
+    # (model_path/f'{obj_name}_img_render').mkdir(exist_ok=True)
+    # (model_path/f'{obj_name}_img_gt').mkdir(exist_ok=True)
 
     # 0. Load trained pcd
-    vol = load_pcd_file(dataset.model_path, gs_args.iteration)
-
+    # vol = load_pcd_file(dataset.model_path, gs_args.iteration)
+    vol = load_sim_pcd_file(args.sim_ini_pcd_path)
+    
     
     # estimation_params = Namespace(**read_estimation_result(dataset, phys_args))
     # print(estimation_params.fps)
     # simulator = Simulator(estimation_params, vol)
     # d_xyz_list = gen_xyz_list(simulator, gs_args.predict_frames, diff=True, save_ply=False, path=dataset.model_path)
     # d_xyz_list = d_xyz_list[:20]
-    print(gs_args.test_iterations + list(range(10000, 40001, 1000)))
+    # print(gs_args.test_iterations + list(range(10000, 40001, 1000)))
     scene = train_gs_with_fixed_pcd(
         vol, 
         dataset, 
         opt, 
         pipe, 
-        gs_args.test_iterations + list(range(10000, 40001, 1000)), 
-        gs_args.save_iterations, 
+        list(range(10000, 40001, 1000)), 
+        list(range(10000, 40001, 10000)), 
         None,
         fps = 24,
         # estimation_params.fps, 

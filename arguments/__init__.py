@@ -114,7 +114,7 @@ class OptimizationParams(ParamGroup):
         self.densify_until_iter = 15_000
         self.densify_grad_threshold = 1.5e-4
         self.reg_rigid = False
-        self.reg_scale = False
+        self.reg_scale = True
         self.reg_tgs = False
         self.reg_alpha = False
         self.num_knn = 20
