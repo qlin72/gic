@@ -22,8 +22,10 @@ from tqdm import tqdm
 
 # dataset.model_path
 def load_pcd_file(file_path, iteration):
+    # path = os.path.join(file_path, 'point_cloud', f'iteration_{iteration}', 'point_cloud.ply')
     # path = os.path.join(file_path, 'point_cloud_fix_pcd', f'iteration_{iteration}', 'point_cloud.ply')
     path = os.path.join(file_path, "mpm", "static_0.ply")
+    print(path)
     pcd = tm.load_mesh(path)
     np_pcd = np.array(pcd.vertices)
     vol = torch.from_numpy(np_pcd).to('cuda',dtype=torch.float32).contiguous()

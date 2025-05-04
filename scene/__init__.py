@@ -33,6 +33,8 @@ class Scene:
         self.model_path = args.model_path
         self.loaded_iter = None
         self.gaussians = gaussians
+        
+        print(args.source_path)
 
         if load_iteration:
             if load_iteration == -1:
