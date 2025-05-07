@@ -37,6 +37,10 @@ def train(dataset, opt, pipe, testing_iterations, saving_iterations, pcd, d_xyz_
     progress_bar = tqdm(range(opt.iterations), desc="Training fixed pcd progress")
     print(f"reg alpha {opt.reg_alpha}")
     print(f"reg scale {opt.reg_scale}")
+    
+    dir_path = dataset.model_path + '/gs'
+    os.makedirs(dir_path, exist_ok=True)
+    
     for iteration in range(1, opt.iterations + 1):
 
         iter_start.record()

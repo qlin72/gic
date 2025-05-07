@@ -66,9 +66,9 @@ class Scene:
             assert False, "Could not recognize scene type!"
 
         if not self.loaded_iter and read_cam:
-            with open(scene_info.ply_path, 'rb') as src_file, open(os.path.join(self.model_path, "input.ply"),
-                                                                   'wb') as dest_file:
-                dest_file.write(src_file.read())
+            # with open(scene_info.ply_path, 'rb') as src_file, open(os.path.join(self.model_path, "input.ply"),
+            #                                                        'wb') as dest_file:
+            #     dest_file.write(src_file.read())
             json_cams = []
             camlist = []
             if scene_info.test_cameras:

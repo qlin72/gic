@@ -42,7 +42,9 @@ class ParamGroup:
 
     def extract(self, args):
         group = GroupParams()
+        print(vars(self))
         for arg in vars(args).items():
+            print(arg)
             if arg[0] in vars(self) or ("_" + arg[0]) in vars(self):
                 setattr(group, arg[0], arg[1])
         return group
@@ -81,7 +83,9 @@ class ModelParams(ParamGroup):
 
     def extract(self, args):
         g = super().extract(args)
+        print(g)
         g.source_path = os.path.abspath(g.source_path)
+        os.makedirs(g.model_path, exist_ok=True)
         return g
 
 

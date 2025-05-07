@@ -31,12 +31,14 @@ if __name__ == "__main__":
     parser.add_argument("--train_frames", default=14, type=int)
     # parser.add_argument("--gt_path", type=str)
     # parser.add_argument('-cid', '--config_id', type=int, default=0)
-    parser.add_argument('--source_path', type=str)
-    parser.add_argument('--config_path', type=str)
-    parser.add_argument('--model_path', type=str)
+    
+    # parser.add_argument('--source_path', type=str)
+    # parser.add_argument('--config_path', type=str)
+    # parser.add_argument('--model_path', type=str)
+    
     parser.add_argument('--sim_ini_pcd_path', type=str)
     
-    model = ModelParams(parser)#, sentinel=True)
+    model = ModelParams(parser, sentinel=False)
     pipeline = PipelineParams(parser)
     op = OptimizationParams(parser)
     

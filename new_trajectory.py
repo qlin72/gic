@@ -39,6 +39,11 @@ def load_sim_pcd_file(file_path):
     pcd = tm.load_mesh(file_path)
     np_pcd = np.array(pcd.vertices)
     vol = torch.from_numpy(np_pcd).to('cuda',dtype=torch.float32).contiguous()
+    
+    N = vol.shape[0]
+    M = int(N * 0.25)                            # 25% points
+    idx = torch.randperm(N, device=vol.device)[:M]
+    vol = vol[idx]                              # (M,3)
     return vol
 
 
