@@ -19,6 +19,8 @@ import torchvision
 import json
 from utils.system_utils import mkdir_p, write_particles
 from tqdm import tqdm
+from plyfile import PlyData, PlyElement
+
 
 # dataset.model_path
 def load_pcd_file(file_path, iteration):
@@ -46,6 +48,76 @@ def load_sim_pcd_file(file_path):
     vol = vol[idx]                              # (M,3)
     return vol
 
+def save_xyz_vel_to_ply(points, velocity, save_path):
+    """
+    Save point cloud with velocity vectors to .ply file.
+
+    Args:
+        points (Tensor): (N, 3) XYZ coordinates
+        velocity (Tensor): (N, 3) velocity vectors
+        save_path (str): Output .ply file path
+    """
+    assert points.shape == velocity.shape
+    xyz = points.detach().cpu().numpy()
+    vel = velocity.detach().cpu().numpy()
+
+    vertex_data = np.array([
+        (x, y, z, vx, vy, vz)
+        for (x, y, z), (vx, vy, vz) in zip(xyz, vel)
+    ], dtype=[
+        ('x', 'f4'), ('y', 'f4'), ('z', 'f4'),
+        ('vx', 'f4'), ('vy', 'f4'), ('vz', 'f4')
+    ])
+
+    el = PlyElement.describe(vertex_data, 'vertex')
+    PlyData([el]).write(save_path)
+    
+def load_sample_and_save_pcd_with_velocity(file_path_1, file_path_2,
+                                           velocity_1, velocity_2,
+                                           ratio=0.25, device='cuda'):
+    """
+    Load two point clouds, downsample, assign initial velocities,
+    and save them to the parent folder of file_path_1.
+    """
+
+    def load_and_sample(file_path, ratio):
+        mesh = tm.load_mesh(file_path)
+        vertices = np.array(mesh.vertices)
+        tensor = torch.from_numpy(vertices).to(device, dtype=torch.float32)
+        N = tensor.shape[0]
+        M = int(N * ratio)
+        idx = torch.randperm(N, device=device)[:M]
+        return tensor[idx]
+
+    # Load and sample
+    pcd1 = load_and_sample(file_path_1, ratio)
+    pcd2 = load_and_sample(file_path_2, ratio)
+
+    # Assign velocity
+    vel1 = torch.tensor(velocity_1, dtype=torch.float32, device=device).unsqueeze(0).expand(pcd1.shape[0], 3)
+    vel2 = torch.tensor(velocity_2, dtype=torch.float32, device=device).unsqueeze(0).expand(pcd2.shape[0], 3)
+
+    # Get parent folder (one level up from file_path_1)
+    parent_folder = os.path.abspath(os.path.join(os.path.dirname(file_path_1), ".."))
+    save_path_1 = os.path.join(parent_folder, "sampled_obj1_with_velocity.ply")
+    save_path_2 = os.path.join(parent_folder, "sampled_obj2_with_velocity.ply")
+    save_path_3 = os.path.join(parent_folder, "sampled_obj3_with_velocity.ply")
+    
+
+    # Save both
+    save_xyz_vel_to_ply(pcd1, vel1, save_path_1)
+    save_xyz_vel_to_ply(pcd2, vel2, save_path_2)
+
+    merged_pcd = torch.cat([pcd1, pcd2], dim=0)
+    vel3 = torch.cat([vel1, vel2], dim=0)
+
+    save_xyz_vel_to_ply(merged_pcd, vel3, save_path_3)
+    split_index = pcd1.shape[0]
+    print(split_index)
+    print("pcd1",pcd1.shape[0])
+    print("pcd2",pcd2.shape[0])
+    print("merged_pcd",merged_pcd.shape[0])
+    return merged_pcd,split_index
 
 
 def gen_xyz_list(simulator, frames, diff=True, save_ply=False, path=None):

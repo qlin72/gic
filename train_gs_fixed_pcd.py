@@ -15,7 +15,7 @@ from utils.sh_utils import SH2RGB
 from scene.gaussian_model import BasicPointCloud
 
 
-def train(dataset, opt, pipe, testing_iterations, saving_iterations, pcd, d_xyz_list=None, fps=24, cam_info=None, grid_size=0.12):
+def train(dataset, opt, pipe, testing_iterations, saving_iterations, pcd, d_xyz_list=None, fps=24, cam_info=None, grid_size=0.12, split_index =None):
     gaussians = GaussianModel(dataset.sh_degree)
     scene = Scene(dataset, gaussians, resolution_scales=[dataset.res_scale], pcd=pcd, load_fix_pcd=True, cam_info=cam_info)
     if d_xyz_list:
@@ -77,7 +77,7 @@ def train(dataset, opt, pipe, testing_iterations, saving_iterations, pcd, d_xyz_
         render_pkg_re = render(viewpoint_cam, gaussians, pipe, background, d_xyz, d_rotation, d_scaling, dataset.is_6dof)
         image, viewspace_point_tensor, visibility_filter, radii, alpha = render_pkg_re["render"], render_pkg_re[
             "viewspace_points"], render_pkg_re["visibility_filter"], render_pkg_re["radii"], render_pkg_re["alpha"]
-
+    
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()
         Ll1 = l1_loss(image, gt_image)
@@ -140,7 +140,7 @@ def train(dataset, opt, pipe, testing_iterations, saving_iterations, pcd, d_xyz_
 
             if iteration in saving_iterations:
                 print("\n[ITER {}] Saving Gaussians".format(iteration))
-                scene.save(iteration, fix_pcd=True)
+                scene.save(iteration, fix_pcd=False)
             
             if iteration % 1000 == 0: 
                 vertex_colors = np.concatenate([(gaussians.get_opacity.detach().cpu().numpy()*255).astype(np.uint8)]*3, axis=1)
@@ -225,6 +225,23 @@ def train_gs_with_fixed_pcd(xyz, dataset, opt, pipe, testing_iterations, saving_
     gaussians = GaussianModel(dataset.sh_degree)
     scene = Scene(dataset, gaussians, load_iteration=opt.iterations, shuffle=False, resolution_scales=[1.0], load_fix_pcd=True, cam_info=cam_info)
     return scene
+
+def train_gs_with_fixed_pcd_2_objs(xyz, dataset, opt, pipe, testing_iterations, saving_iterations, d_xyz_list, fps, split_idx, color_obj1, 
+    color_obj2,force_train=False, cam_info=None, grid_size=0.12):
+    xyz = xyz.cpu().detach().numpy()
+    num_pts= xyz.shape[0]
+    rgb = np.zeros((num_pts, 3))
+    rgb[:split_idx] = np.array(color_obj1)
+    rgb[split_idx:] = np.array(color_obj2)
+    pcd = BasicPointCloud(points=xyz, colors=rgb, normals=np.zeros((num_pts, 3)))
+    if (not check_gs_model(dataset.model_path, saving_iterations, fix_pcd=True)) or force_train:
+        train(dataset, opt, pipe, testing_iterations, saving_iterations, pcd, d_xyz_list=d_xyz_list, fps=fps, cam_info=cam_info, grid_size=grid_size)
+    # gaussians = GaussianModel(dataset.sh_degree)
+    # scene = Scene(dataset, gaussians, load_iteration=opt.iterations, shuffle=False, resolution_scales=[1.0], load_fix_pcd=False, cam_info=cam_info)
+    # return scene
+    return
+
+
 
 
 def assign_gs_to_pcd(xyz, xyz_opacity, dataset, opt, pipe, cam_info, grid_size=0.12, scene=None):

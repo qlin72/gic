@@ -1,0 +1,11 @@
+{
+    "gs":{
+        "eval": true,
+        "is_blender": true,
+        "timenet": true,
+        "test_iterations": [5000, 6000, 7000],
+        "save_iterations": [7000,10000,20000,30000,40000],
+        "quiet": false,
+        "iteration": 40000
+    }
+}
