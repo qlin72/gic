@@ -102,7 +102,7 @@ if __name__ == "__main__":
     print("c1",c1)
     print("c2",c2)
     
-    vol,slipt_idx = load_sample_and_save_pcd_with_velocity(args.sim_ini_pcd1_path,args.sim_ini_pcd2_path,v1,v2,ratio=0.075)
+    vol,slipt_idx = load_sample_and_save_pcd_with_velocity(args.sim_ini_pcd1_path,args.sim_ini_pcd2_path,v1,v2,args.model_path,ratio=1)
     
     print("vol:",vol)
     
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         opt, 
         pipe, 
         list(range(10000, 10001, 1000)), 
-        list(range(10000, 10001, 10000)), 
+        list(range(10000, 40001, 10000)), 
         None,
         fps = 24,
         # estimation_params.fps, 

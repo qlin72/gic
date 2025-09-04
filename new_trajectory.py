@@ -73,7 +73,7 @@ def save_xyz_vel_to_ply(points, velocity, save_path):
     PlyData([el]).write(save_path)
     
 def load_sample_and_save_pcd_with_velocity(file_path_1, file_path_2,
-                                           velocity_1, velocity_2,
+                                           velocity_1, velocity_2,output_folder,
                                            ratio=0.25, device='cuda'):
     """
     Load two point clouds, downsample, assign initial velocities,
@@ -98,10 +98,10 @@ def load_sample_and_save_pcd_with_velocity(file_path_1, file_path_2,
     vel2 = torch.tensor(velocity_2, dtype=torch.float32, device=device).unsqueeze(0).expand(pcd2.shape[0], 3)
 
     # Get parent folder (one level up from file_path_1)
-    parent_folder = os.path.abspath(os.path.join(os.path.dirname(file_path_1), ".."))
-    save_path_1 = os.path.join(parent_folder, "sampled_obj1_with_velocity.ply")
-    save_path_2 = os.path.join(parent_folder, "sampled_obj2_with_velocity.ply")
-    save_path_3 = os.path.join(parent_folder, "sampled_obj3_with_velocity.ply")
+    
+    save_path_1 = os.path.join(output_folder, "sampled_obj1_with_velocity.ply")
+    save_path_2 = os.path.join(output_folder, "sampled_obj2_with_velocity.ply")
+    save_path_3 = os.path.join(output_folder, "sampled_obj3_with_velocity.ply")
     
 
     # Save both

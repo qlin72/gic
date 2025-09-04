@@ -31,4 +31,46 @@
 # python train_fixed_gs_2objs_genesis.py --config_path 'config/dataset_45_genesis/default.json' --model_path 'output/dataset_45_new_small/13'  --source_path '/data/dataset_45_new_small/13' --sim_ini_pcd1_path '/data/dataset_45_new_small/13/point_clouds/0/0.ply' --sim_ini_pcd2_path '/data/dataset_45_new_small/13/point_clouds/1/0.ply' --json_path  '/data/dataset_45_new_small/13/metadata.json'
 
 
-python train_fixed_gs_2objs_genesis.py --config_path 'config/dataset_45_genesis/default.json' --model_path 'output/dataset_45_new_small/13'  --source_path '/data/dataset_45_new_small/13' --sim_ini_pcd1_path '/data/dataset_45_new_small/13/point_clouds/0/0.ply' --sim_ini_pcd2_path '/data/dataset_45_new_small/13/point_clouds/1/0.ply' --json_path  '/data/dataset_45_new_small/13/metadata.json'
+# python train_fixed_gs_2objs_genesis.py --config_path 'config/dataset_45_genesis/default.json' --model_path 'output/dataset_45_new_small/13'  --source_path '/data/dataset_45_new_small/13' --sim_ini_pcd1_path '/data/dataset_45_new_small/13/point_clouds/0/0.ply' --sim_ini_pcd2_path '/data/dataset_45_new_small/13/point_clouds/1/0.ply' --json_path  '/data/dataset_45_new_small/13/metadata.json'
+
+
+for i in $(seq 0 8); do
+    for j in $(seq $((i+1)) 9); do
+        ID="${i}${j}"  # 拼接成字符串形式，比如 i=0, j=2 时是 "02"
+        python train_fixed_gs_2objs_genesis.py \
+          --config_path 'config/dataset_45_genesis/default.json' \
+          --model_path "output/dataset_45_new/${ID}" \
+          --source_path "/data/dataset_45_new/${ID}" \
+          --sim_ini_pcd1_path "/data/dataset_45_new/${ID}/point_clouds/0/0.ply" \
+          --sim_ini_pcd2_path "/data/dataset_45_new/${ID}/point_clouds/1/0.ply" \
+          --json_path "/data/dataset_45_new/${ID}/metadata.json"
+    done
+done
+
+
+# for i in $(seq 0 8); do
+#     j=$((i+1))
+#     ID="${i}${j}" 
+#     python train_fixed_gs_2objs_genesis.py \
+#         --config_path 'config/dataset_45_genesis/default.json' \
+#         --model_path "output/dataset_45_new/${ID}" \
+#         --source_path "/data/dataset_45_new/${ID}" \
+#         --sim_ini_pcd1_path "/data/dataset_45_new/${ID}/point_clouds/0/0.ply" \
+#         --sim_ini_pcd2_path "/data/dataset_45_new/${ID}/point_clouds/1/0.ply" \
+#         --json_path "/data/dataset_45_new/${ID}/metadata.json"
+# done
+
+
+
+# for i in $(seq 0 0); do
+#     for j in $(seq 7 7); do
+#         ID="${i}${j}"  # 拼接成字符串形式，比如 i=0, j=2 时是 "02"
+#         python train_fixed_gs_2objs_genesis.py \
+#           --config_path 'config/dataset_45_genesis/default.json' \
+#           --model_path "output/dataset_45_new_0.01/${ID}" \
+#           --source_path "/data/dataset_45_new_0.01/${ID}" \
+#           --sim_ini_pcd1_path "/data/dataset_45_new_0.01/${ID}/point_clouds/0/0.ply" \
+#           --sim_ini_pcd2_path "/data/dataset_45_new_0.01/${ID}/point_clouds/1/0.ply" \
+#           --json_path "/data/dataset_45_new_0.01/${ID}/metadata.json"
+#     done
+# done
